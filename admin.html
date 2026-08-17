@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel · Lava Expresso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
+</head>
+<body class="admin">
+
+<!-- ===== LOGIN ===== -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="logo">
+      <svg viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C11 0 21 12.2 21 17.5C21 23 16.5 26 11 26C5.5 26 1 23 1 17.5C1 12.2 11 0 11 0Z" fill="#00C2CB"/></svg>
+      Lava Expresso
+    </div>
+    <h2>Painel da equipe</h2>
+    <p class="sub">Entre com seu e-mail e senha cadastrados no Firebase.</p>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="login-senha">Senha</label>
+        <input type="password" id="login-senha" required autocomplete="current-password">
+      </div>
+      <span class="err" id="login-error" style="margin-bottom:10px;">E-mail ou senha inválidos.</span>
+      <button type="submit" class="btn btn-primary btn-block" id="login-btn">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== PAINEL ===== -->
+<div class="admin-shell" id="admin-shell">
+  <div class="admin-topbar">
+    <div class="logo">
+      <svg viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C11 0 21 12.2 21 17.5C21 23 16.5 26 11 26C5.5 26 1 23 1 17.5C1 12.2 11 0 11 0Z" fill="#00C2CB"/></svg>
+      Painel · Lava Expresso
+    </div>
+    <div class="right">
+      <button class="pending-pill" id="pending-pill" hidden>
+        <span class="n" id="pending-count">0</span> aguardando confirmação
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-logout" style="color:var(--foam); border-color:rgba(241,250,249,.35);">Sair</button>
+    </div>
+  </div>
+
+  <div class="admin-main">
+    <div class="admin-toolbar-row">
+      <h1>Agenda</h1>
+      <button class="btn btn-primary btn-sm" id="btn-novo-agendamento">+ Novo agendamento</button>
+    </div>
+
+    <div class="calendar-card">
+      <div id="calendar"></div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i> Pendente</span>
+        <span><i style="background:var(--blue)"></i> Confirmado</span>
+        <span><i style="background:var(--green)"></i> Pago / concluído</span>
+        <span><i style="background:#BBB"></i> Cancelado</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL AGENDAMENTO ===== -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" id="modal-close">&times;</button>
+    <h3 id="modal-title">Novo agendamento</h3>
+    <p class="modal-sub" id="modal-sub"></p>
+
+    <form id="agendamento-form">
+      <div class="field-row">
+        <div class="field">
+          <label for="f-nome">Cliente</label>
+          <input type="text" id="f-nome" required>
+        </div>
+        <div class="field">
+          <label for="f-telefone">Telefone</label>
+          <input type="text" id="f-telefone" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-carro">Carro</label>
+          <input type="text" id="f-carro" required>
+        </div>
+        <div class="field">
+          <label for="f-placa">Placa</label>
+          <input type="text" id="f-placa" required style="font-family:var(--font-plate); letter-spacing:.1em;">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-servico">Serviço</label>
+        <select id="f-servico"></select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="f-data">Data</label>
+          <input type="date" id="f-data" required>
+        </div>
+        <div class="field">
+          <label for="f-hora">Horário</label>
+          <input type="time" id="f-hora" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Status</label>
+        <div class="status-select">
+          <button type="button" class="status-chip" data-v="pendente">Pendente</button>
+          <button type="button" class="status-chip" data-v="confirmado">Confirmado</button>
+          <button type="button" class="status-chip" data-v="concluido">Concluído</button>
+          <button type="button" class="status-chip" data-v="cancelado">Cancelado</button>
+        </div>
+        <input type="hidden" id="f-status-hidden" value="pendente">
+      </div>
+
+      <div class="field">
+        <label class="pay-toggle">
+          Pagamento recebido
+          <span class="switch">
+            <input type="checkbox" id="f-pago">
+            <span class="track"></span>
+          </span>
+        </label>
+      </div>
+
+      <div class="field">
+        <label for="f-obs">Observações</label>
+        <textarea id="f-obs" rows="2"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-primary" id="btn-salvar">Salvar</button>
+      </div>
+      <div class="modal-danger-row" id="modal-delete-row" hidden>
+        <button type="button" class="btn btn-text" id="btn-cancelar-agendamento">Cancelar agendamento</button>
+        ·
+        <button type="button" class="btn btn-text" id="btn-excluir-agendamento" style="color:var(--red);">Excluir</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { initAuth } from "./js/admin-auth.js";
+  import { initCalendar, bindAdminUI } from "./js/admin-calendar.js";
+
+  let started = false;
+  initAuth({
+    onLogin() {
+      if (!started) {
+        started = true;
+        initCalendar();
+        bindAdminUI();
+      }
+    },
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lava Expresso — Agende sua lavagem</title>
+<meta name="description" content="Agende a lavagem do seu carro em menos de 1 minuto.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/booking.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="logo">
+      <svg class="drop" viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11 0C11 0 21 12.2 21 17.5C21 23 16.5 26 11 26C5.5 26 1 23 1 17.5C1 12.2 11 0 11 0Z" fill="#00C2CB"/>
+      </svg>
+      Lava Expresso
+    </div>
+    <nav>
+      <a href="#servicos">Serviços</a>
+      <a href="admin.html">Sou da equipe</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow"><span class="dot"></span> Agendamento online</div>
+      <h1>Seu carro limpo, sem <em>perder tempo</em> na fila.</h1>
+      <p class="lead">Escolha o serviço, a data e o horário. A gente confirma pelo telefone e deixa o carro pronto no horário combinado.</p>
+      <a href="#agendar" class="btn btn-primary">Agendar minha lavagem</a>
+      <div class="hero-stats">
+        <div><b>4</b><span>Serviços</span></div>
+        <div><b>seg–sáb</b><span>Funcionamento</span></div>
+        <div><b>~40min</b><span>Lavagem simples</span></div>
+      </div>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 420 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="210" cy="300" rx="170" ry="18" fill="#0B2027" opacity=".35"/>
+        <rect x="60" y="150" width="300" height="110" rx="26" fill="#15616D"/>
+        <path d="M95 150 L140 90 Q160 70 190 70 L250 70 Q280 70 300 90 L340 150 Z" fill="#1B7A87"/>
+        <rect x="150" y="95" width="40" height="42" rx="8" fill="#0F3B45"/>
+        <rect x="205" y="95" width="70" height="42" rx="8" fill="#0F3B45"/>
+        <circle cx="130" cy="262" r="30" fill="#0B2027"/>
+        <circle cx="130" cy="262" r="12" fill="#5C7A80"/>
+        <circle cx="290" cy="262" r="30" fill="#0B2027"/>
+        <circle cx="290" cy="262" r="12" fill="#5C7A80"/>
+        <g opacity=".9">
+          <circle cx="60" cy="60" r="6" fill="#00C2CB"/>
+          <circle cx="90" cy="40" r="4" fill="#00C2CB"/>
+          <circle cx="350" cy="70" r="7" fill="#00C2CB"/>
+          <circle cx="380" cy="40" r="4" fill="#00C2CB"/>
+          <circle cx="320" cy="30" r="4" fill="#BEEFEF"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div id="agendar" class="ticket-wrap">
+  <div class="ticket" id="ticket">
+    <div class="ticket-notch" style="left:-13px;"></div>
+    <div class="ticket-notch" style="right:-13px;"></div>
+    <div class="ticket-inner">
+
+      <div class="steps-head">
+        <div class="step-dot active">1</div><div class="step-line"></div>
+        <div class="step-dot">2</div><div class="step-line"></div>
+        <div class="step-dot">3</div><div class="step-line"></div>
+        <div class="step-dot">4</div>
+      </div>
+
+      <!-- Passo 1: dados do cliente -->
+      <div class="step-panel" data-step="1">
+        <h3 style="margin-bottom:18px;">Seus dados</h3>
+        <div class="field">
+          <label for="input-nome">Nome completo</label>
+          <input type="text" id="input-nome" placeholder="Ex: Matheus Alves">
+          <span class="err" id="err-nome"></span>
+        </div>
+        <div class="field">
+          <label for="input-telefone">Telefone (WhatsApp)</label>
+          <input type="tel" id="input-telefone" placeholder="(11) 99999-0000">
+          <span class="err" id="err-telefone"></span>
+        </div>
+        <div class="step-actions">
+          <span></span>
+          <button class="btn btn-primary" id="btn-step1-next">Continuar</button>
+        </div>
+      </div>
+
+      <!-- Passo 2: carro -->
+      <div class="step-panel" data-step="2" hidden>
+        <h3 style="margin-bottom:18px;">Seu carro</h3>
+        <div class="field">
+          <label for="input-carro">Modelo do carro</label>
+          <input type="text" id="input-carro" placeholder="Ex: Honda Civic prata">
+          <span class="err" id="err-carro"></span>
+        </div>
+        <div class="field">
+          <label for="input-placa">Placa</label>
+          <input type="text" id="input-placa" placeholder="ABC1D23" style="font-family:var(--font-plate); letter-spacing:.1em;">
+          <span class="err" id="err-placa"></span>
+        </div>
+        <div class="step-actions">
+          <button class="btn btn-outline" id="btn-step2-back">Voltar</button>
+          <button class="btn btn-primary" id="btn-step2-next">Continuar</button>
+        </div>
+      </div>
+
+      <!-- Passo 3: serviço -->
+      <div class="step-panel" data-step="3" hidden>
+        <h3 style="margin-bottom:18px;">Escolha o serviço</h3>
+        <div class="service-grid" id="service-grid"></div>
+        <div class="step-actions">
+          <button class="btn btn-outline" id="btn-step3-back">Voltar</button>
+          <button class="btn btn-primary" id="btn-step3-next" disabled>Continuar</button>
+        </div>
+      </div>
+
+      <!-- Passo 4: data/horário -->
+      <div class="step-panel" data-step="4" hidden>
+        <h3 style="margin-bottom:18px;">Data e horário</h3>
+        <div class="field">
+          <label for="input-data">Data</label>
+          <input type="date" id="input-data">
+        </div>
+        <div class="field">
+          <label>Horários disponíveis</label>
+          <div class="slots" id="slots">
+            <div class="slots-empty">Escolha uma data para ver os horários.</div>
+          </div>
+        </div>
+        <div class="step-actions">
+          <button class="btn btn-outline" id="btn-step4-back">Voltar</button>
+          <button class="btn btn-primary" id="btn-step4-next" disabled>Revisar pedido</button>
+        </div>
+      </div>
+
+      <!-- Passo 5: resumo + confirmação -->
+      <div class="step-panel" data-step="5" hidden>
+        <h3 style="margin-bottom:14px;">Confira seu agendamento</h3>
+        <div id="resumo"></div>
+        <p class="hint" style="margin:14px 0 6px;">Esse horário fica reservado como <b>pendente</b> até a nossa equipe confirmar por telefone.</p>
+        <div class="step-actions">
+          <button class="btn btn-outline" id="btn-step4-back-2" onclick="document.getElementById('btn-step4-back').click()">Voltar</button>
+          <button class="btn btn-primary" id="btn-confirmar">Confirmar solicitação</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<section class="info-section container" id="servicos">
+  <h2 class="reveal" style="font-size:1.6rem; margin-bottom:24px;">Como funciona</h2>
+  <div class="info-grid">
+    <div class="info-card reveal">
+      <div class="ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <h4>1. Você agenda</h4>
+      <p>Escolhe o serviço, o carro e o horário que combina com sua agenda — leva menos de 1 minuto.</p>
+    </div>
+    <div class="info-card reveal">
+      <div class="ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h4>2. Nós confirmamos</h4>
+      <p>Nossa equipe confirma o horário pelo telefone informado antes do dia da lavagem.</p>
+    </div>
+    <div class="info-card reveal">
+      <div class="ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <h4>3. Você chega no horário</h4>
+      <p>É só chegar na hora marcada com o carro — sem fila, sem espera.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    Lava Expresso · <span id="telefone-negocio"></span> · Tarumã, SP
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script type="module" src="js/booking.js"></script>
+</body>
+</html>

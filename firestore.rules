@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // AGENDAMENTOS
+    // - Qualquer pessoa pode CRIAR uma solicitação (status precisa nascer "pendente"
+    //   e origem "cliente" — evita que alguém crie já como confirmado/pago pelo site público).
+    // - Só a equipe autenticada pode LER, ATUALIZAR (confirmar, reagendar, marcar pago) ou EXCLUIR.
+    match /agendamentos/{agendamentoId} {
+      allow create: if request.resource.data.status == 'pendente'
+                    && request.resource.data.origem == 'cliente'
+                    && request.resource.data.pago == false;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // CLIENTES (histórico simples por placa)
+    // - Qualquer pessoa pode criar/atualizar o próprio cadastro ao agendar (upsert por placa).
+    // - Só a equipe autenticada pode ler a lista de clientes.
+    match /clientes/{placa} {
+      allow create, update: if true;
+      allow read: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+  }
+}
