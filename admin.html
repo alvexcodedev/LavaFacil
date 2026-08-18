@@ -35,6 +35,7 @@
       <span class="err" id="login-error" style="margin-bottom:10px;">E-mail ou senha inválidos.</span>
       <button type="submit" class="btn btn-primary btn-block" id="login-btn">Entrar</button>
     </form>
+    <p style="margin-top:16px;"><a href="index.html" style="font-size:.82rem;color:var(--muted);">&larr; Voltar ao site</a></p>
   </div>
 </div>
 
@@ -43,31 +44,111 @@
   <div class="admin-topbar">
     <div class="logo">
       <svg viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C11 0 21 12.2 21 17.5C21 23 16.5 26 11 26C5.5 26 1 23 1 17.5C1 12.2 11 0 11 0Z" fill="#00C2CB"/></svg>
-      Painel · Lava Expresso
+      Lava Expresso
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-view="painel">Painel</button>
+      <button class="admin-tab" data-view="agenda">Agenda</button>
     </div>
     <div class="right">
-      <button class="pending-pill" id="pending-pill" hidden>
-        <span class="n" id="pending-count">0</span> aguardando confirmação
-      </button>
       <button class="btn btn-ghost btn-sm" id="btn-logout" style="color:var(--foam); border-color:rgba(241,250,249,.35);">Sair</button>
     </div>
   </div>
 
   <div class="admin-main">
-    <div class="admin-toolbar-row">
-      <h1>Agenda</h1>
-      <button class="btn btn-primary btn-sm" id="btn-novo-agendamento">+ Novo agendamento</button>
-    </div>
 
-    <div class="calendar-card">
-      <div id="calendar"></div>
-      <div class="legend">
-        <span><i style="background:var(--amber)"></i> Pendente</span>
-        <span><i style="background:var(--blue)"></i> Confirmado</span>
-        <span><i style="background:var(--green)"></i> Pago / concluído</span>
-        <span><i style="background:#BBB"></i> Cancelado</span>
+    <!-- ===== VIEW: PAINEL (dashboard) ===== -->
+    <div class="admin-view active" id="view-painel">
+      <div class="admin-toolbar-row">
+        <h1>Painel do dia</h1>
+        <button class="btn btn-primary btn-sm" id="btn-novo-agendamento">+ Novo agendamento</button>
+      </div>
+
+      <div class="stats-grid">
+        <button type="button" class="stat-card amber" id="stat-pendentes">
+          <div class="stat-top">
+            <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Aguardando confirmação</div>
+        </button>
+
+        <button type="button" class="stat-card blue" id="stat-confirmados">
+          <div class="stat-top">
+            <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M8 7V3M16 7V3M4 11h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="2"/></svg></div>
+            <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Confirmados hoje</div>
+        </button>
+
+        <button type="button" class="stat-card green" id="stat-concluidos">
+          <div class="stat-top">
+            <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Concluídos hoje</div>
+        </button>
+
+        <button type="button" class="stat-card red" id="stat-cancelados">
+          <div class="stat-top">
+            <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Cancelados neste mês</div>
+        </button>
+
+        <button type="button" class="stat-card teal" id="stat-total">
+          <div class="stat-top">
+            <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18" stroke="currentColor" stroke-width="2"/></svg></div>
+            <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Agendamentos hoje</div>
+        </button>
+
+        <button type="button" class="stat-card green" id="stat-faturamento">
+          <div class="stat-top">
+            <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 6H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-num">R$ 0,00</div>
+          <div class="stat-label">Recebido hoje</div>
+        </button>
+      </div>
+
+      <h2 class="dash-section-title">Próximos agendamentos</h2>
+      <div class="proximos-card">
+        <div id="dash-proximos"><p class="muted-empty">Carregando…</p></div>
       </div>
     </div>
+
+    <!-- ===== VIEW: AGENDA (calendário) ===== -->
+    <div class="admin-view" id="view-agenda">
+      <div class="admin-toolbar-row">
+        <h1>Agenda</h1>
+        <button class="btn btn-primary btn-sm" id="btn-novo-agendamento-2">+ Novo agendamento</button>
+      </div>
+
+      <div class="filter-chip" id="filter-chip" hidden>
+        Filtro: <span class="label"></span>
+        <button type="button" id="filter-chip-clear">&times;</button>
+      </div>
+
+      <div class="calendar-card">
+        <div id="calendar"></div>
+        <div class="legend">
+          <span><i style="background:var(--amber)"></i> Pendente</span>
+          <span><i style="background:var(--blue)"></i> Confirmado</span>
+          <span><i style="background:var(--green)"></i> Pago / concluído</span>
+          <span><i style="background:#BBB"></i> Cancelado</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -159,6 +240,22 @@
 <script type="module">
   import { initAuth } from "./admin-auth.js";
   import { initCalendar, bindAdminUI } from "./admin-calendar.js";
+  import { initDashboard } from "./admin-dashboard.js";
+
+  // troca entre as abas Painel / Agenda
+  document.querySelectorAll(".admin-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".admin-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      document.querySelectorAll(".admin-view").forEach((v) => v.classList.remove("active"));
+      document.getElementById(`view-${tab.dataset.view}`).classList.add("active");
+    });
+  });
+
+  // o botão "+ Novo agendamento" existe duplicado (painel e agenda) — ambos abrem o mesmo modal
+  document.getElementById("btn-novo-agendamento-2").addEventListener("click", () => {
+    document.getElementById("btn-novo-agendamento").click();
+  });
 
   let started = false;
   initAuth({
@@ -167,6 +264,7 @@
         started = true;
         initCalendar();
         bindAdminUI();
+        initDashboard();
       }
     },
   });
