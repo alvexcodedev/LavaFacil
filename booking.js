@@ -4,7 +4,7 @@
 import { db } from "./firebase-config.js";
 import { SERVICOS, HORARIO_FUNCIONAMENTO, TELEFONE_NEGOCIO } from "./config.js";
 import {
-  collection, addDoc, doc, setDoc, getDoc, query, where, getDocs,
+  collection, addDoc, doc, setDoc, query, where, getDocs,
   Timestamp, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -53,7 +53,10 @@ function goToStep(n) {
     d.classList.toggle("done", i + 1 < n);
   });
   $$(".step-line").forEach((l, i) => l.classList.toggle("done", i + 1 < n));
-  if (n === 4) renderResumo();
+  
+  // CORREÇÃO: O resumo só deve ser renderizado no Passo 5
+  if (n === 5) renderResumo();
+  
   $("#ticket").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -145,7 +148,13 @@ async function renderSlots() {
   const duracao = state.servico.duracaoMin;
 
   const agora = new Date();
-  const ehHoje = dataStr === agora.toISOString().slice(0, 10);
+  
+  // CORREÇÃO: Fuso horário local do Brasil para validar se a data escolhida é "hoje"
+  const dataHojeLocal = agora.getFullYear() + "-" + 
+                        String(agora.getMonth() + 1).padStart(2, '0') + "-" + 
+                        String(agora.getDate()).padStart(2, '0');
+                        
+  const ehHoje = dataStr === dataHojeLocal;
   const minMinutosHoje = agora.getHours() * 60 + agora.getMinutes() + HORARIO_FUNCIONAMENTO.antecedenciaMinMin;
 
   const slots = [];
@@ -220,7 +229,8 @@ async function enviarAgendamento() {
       atualizadoEm: serverTimestamp(),
     }, { merge: true });
 
-    goToStep(5);
+    // Avança para a tela final de sucesso (que precisa ser criada ou direcionada)
+    goToStep(6); 
   } catch (err) {
     console.error(err);
     showToast("Não foi possível enviar. Tente novamente.", true);
@@ -268,7 +278,13 @@ function bind() {
   $("#btn-confirmar").addEventListener("click", enviarAgendamento);
 
   const min = new Date();
-  $("#input-data").min = min.toISOString().slice(0, 10);
+  
+  // CORREÇÃO: Fuso horário local para o calendário <input type="date">
+  const minDataLocal = min.getFullYear() + "-" + 
+                       String(min.getMonth() + 1).padStart(2, '0') + "-" + 
+                       String(min.getDate()).padStart(2, '0');
+                       
+  $("#input-data").min = minDataLocal;
 
   $("#telefone-negocio").textContent = TELEFONE_NEGOCIO;
 }
