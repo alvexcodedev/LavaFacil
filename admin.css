@@ -41,10 +41,10 @@ body.admin{ background:var(--foam); }
 .legend i{ width:9px; height:9px; border-radius:50%; display:inline-block; }
 
 /* ---------- FullCalendar theming ---------- */
-.fc{ 
-  font-family:var(--font-body); 
-  --fc-border-color:var(--line); 
-  --fc-today-bg-color:rgba(0,0,0,0.06); /* Fundo limpo e neutro para o dia de hoje */
+.fc{
+  font-family:var(--font-body);
+  --fc-border-color:var(--line);
+  --fc-today-bg-color:rgba(0,0,0,0.06); /* fundo neutro para o dia de hoje */
 }
 .fc .fc-toolbar-title{ font-family:var(--font-display); font-size:1.25rem; color:var(--ink); }
 .fc .fc-button{ background:var(--card); border:1.5px solid var(--line); color:var(--teal); font-weight:600; box-shadow:none; text-transform:capitalize; }
@@ -52,183 +52,35 @@ body.admin{ background:var(--foam); }
 .fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active{ background:var(--teal); border-color:var(--teal); color:#fff; }
 .fc .fc-button:focus{ box-shadow:0 0 0 3px var(--aqua-dim); }
 
-/* Ajuste fino dos eventos na grade */
+/* ajuste fino dos eventos na grade */
 .fc-event{ border:none; padding:2px 4px; cursor:pointer; }
 .fc-daygrid-event{ border-radius:6px; }
-.fc-timegrid-event{ border-radius:6px; margin-bottom: 2px; }
-.fc-event .fc-event-main { color: var(--ink); font-size: 0.85rem; } /* Garante que o texto fique escuro e legível */
-.fc-event .fc-event-time{ font-weight:700; margin-right: 4px; color: inherit; }
+.fc-timegrid-event{ border-radius:6px; margin-bottom:2px; }
+.fc-event .fc-event-main{ color:var(--ink); font-size:.85rem; }
+.fc-event .fc-event-time{ font-weight:700; margin-right:4px; color:inherit; }
 
-/* Status dos eventos - as cores que você já havia definido */
+/* status dos eventos */
 .fc-event.st-pendente{ background:var(--amber-bg); color:#A66A0E; border-left:3px solid var(--amber); }
 .fc-event.st-confirmado{ background:var(--blue-bg); color:#2354BE; border-left:3px solid var(--blue); }
 .fc-event.st-pago{ background:var(--green-bg); color:#1F7A45; border-left:3px solid var(--green); }
 .fc-event.st-cancelado{ background:#EFEFEF; color:#9AA3A3; border-left:3px solid #BBB; text-decoration:line-through; }
-.fc-day-today{ }
 
-/* ---------- modal ---------- */
-.modal-overlay{
-  position:fixed; inset:0; background:rgba(11,32,39,.45); display:none;
-  align-items:center; justify-content:center; z-index:200; padding:20px;
+/* ---------- formulários & inputs ---------- */
+.field{ display:flex; flex-direction:column; margin-bottom:18px; }
+.field label{ font-size:.85rem; font-weight:600; color:var(--ink); margin-bottom:6px; }
+.field input, .field select, .field textarea{
+  font-family:inherit; font-size:.95rem; color:var(--ink); background-color:#fff;
+  border:1.5px solid var(--line); border-radius:8px; padding:12px 14px;
+  transition:all .2s ease; outline:none; width:100%;
 }
-.modal-overlay.open{ display:flex; }
-.modal-box{
-  background:var(--card); border-radius:var(--radius-l); box-shadow:var(--shadow-pop);
-  width:100%; max-width:460px; max-height:90vh; overflow-y:auto; padding:28px;
+.field input:focus, .field select:focus, .field textarea:focus{
+  border-color:var(--teal); box-shadow:0 0 0 3px var(--aqua-dim);
 }
-.modal-box h3{ font-size:1.15rem; margin-bottom:4px; }
-.modal-box .modal-sub{ color:var(--muted); font-size:.82rem; margin-bottom:20px; }
-.modal-close{ float:right; background:none; border:none; font-size:1.3rem; color:var(--muted); line-height:1; }
+.field-row{ display:flex; gap:12px; }
+.field-row .field{ flex:1; }
 
-.status-select{ display:flex; gap:8px; flex-wrap:wrap; }
-.status-chip{
-  padding:8px 14px; border-radius:999px; border:1.5px solid var(--line); font-size:.82rem; font-weight:600;
-  background:#fff; color:var(--muted);
-}
-.status-chip.active[data-v="pendente"]{ background:var(--amber-bg); border-color:var(--amber); color:#A66A0E; }
-.status-chip.active[data-v="confirmado"]{ background:var(--blue-bg); border-color:var(--blue); color:#2354BE; }
-.status-chip.active[data-v="concluido"]{ background:var(--green-bg); border-color:var(--green); color:#1F7A45; }
-.status-chip.active[data-v="cancelado"]{ background:var(--red-bg); border-color:var(--red); color:var(--red); }
-
-.pay-toggle{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--foam); border-radius:var(--radius-s); }
-.switch{ position:relative; width:44px; height:24px; }
-.switch input{ opacity:0; width:0; height:0; }
-.switch .track{ position:absolute; inset:0; background:var(--line); border-radius:999px; transition:.2s; cursor:pointer; }
-.switch .track::before{ content:""; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.3); }
-.switch input:checked + .track{ background:var(--green); }
-.switch input:checked + .track::before{ transform:translateX(20px); }
-
-.modal-actions{ display:flex; gap:10px; margin-top:22px; }
-.modal-actions .btn{ flex:1; }
-.modal-danger-row{ margin-top:12px; text-align:center; }
-
-.client-plate-row{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
-.client-plate-row .info b{ display:block; font-size:.95rem; }
-.client-plate-row .info span{ font-size:.8rem; color:var(--muted); }
-
-@media (max-width: 640px){
-  .fc .fc-toolbar{ flex-direction:column; gap:10px; }
-  .admin-main{ padding:14px; }
-}
-
-/* Oculta a mensagem de erro por padrão */
-.err {
-  display: none;
-  color: #d93025; /* Vermelho para dar destaque ao erro */
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-/* O JavaScript adiciona essa classe para mostrar o erro quando o login falha */
-.err.show {
-  display: block;
-}
-
-/* ---------- Formulários & Inputs ---------- */
-.field {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 18px;
-}
-
-.field label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 6px;
-}
-
-/* Estilo unificado para inputs, selects e textareas */
-.field input,
-.field select,
-.field textarea {
-  font-family: inherit;
-  font-size: 0.95rem;
-  color: var(--ink);
-  background-color: #ffffff;
-  border: 1.5px solid var(--line);
-  border-radius: 8px;
-  padding: 12px 14px;
-  transition: all 0.2s ease;
-  outline: none;
-  width: 100%;
-}
-
-/* Estado de foco (quando o usuário clica para digitar) */
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px var(--aqua-dim);
-}
-
-/* Espaçamento em linha para o modal de agendamento */
-.field-row {
-  display: flex;
-  gap: 12px;
-}
-.field-row .field {
-  flex: 1;
-}
-
-body.admin{ background:var(--foam); }
-
-/* ---------- login ---------- */
-.login-screen{
-  min-height:100vh; display:flex; align-items:center; justify-content:center;
-  background:radial-gradient(circle at 20% 20%, #123c46 0%, var(--ink) 70%);
-}
-.login-card{
-  width:100%; max-width:380px; background:var(--card); border-radius:var(--radius-l);
-  box-shadow:var(--shadow-pop); padding:36px 32px;
-}
-.login-card .logo{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:800; font-size:1.2rem; margin-bottom:26px; color:var(--ink); }
-.login-card .logo svg{ width:20px; height:24px; }
-.login-card h2{ font-size:1.15rem; margin-bottom:4px; }
-.login-card p.sub{ color:var(--muted); font-size:.85rem; margin-bottom:22px; }
-
-/* ---------- shell ---------- */
-.admin-shell{ display:none; min-height:100vh; flex-direction:column; }
-.admin-shell.active{ display:flex; }
-.admin-topbar{
-  background:var(--teal-deep); color:var(--foam); padding:0 22px; height:60px;
-  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
-}
-.admin-topbar .logo{ display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-weight:800; }
-.admin-topbar .logo svg{ width:16px; height:20px; }
-.admin-topbar .right{ display:flex; align-items:center; gap:14px; }
-.pending-pill{
-  display:flex; align-items:center; gap:7px; background:var(--amber-bg); color:#A66A0E;
-  padding:6px 13px; border-radius:999px; font-size:.8rem; font-weight:700; border:none;
-}
-.pending-pill .n{ background:#A66A0E; color:#fff; border-radius:999px; min-width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:.7rem; padding:0 4px;}
-
-.admin-main{ flex:1; padding:22px; max-width:1280px; margin:0 auto; width:100%; }
-.admin-toolbar-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:12px; flex-wrap:wrap;}
-.admin-toolbar-row h1{ font-size:1.3rem; }
-
-.calendar-card{ background:var(--card); border-radius:var(--radius-m); box-shadow:var(--shadow-card); padding:18px; }
-
-.legend{ display:flex; gap:16px; flex-wrap:wrap; margin-top:14px; font-size:.78rem; color:var(--muted); }
-.legend span{ display:inline-flex; align-items:center; gap:6px; }
-.legend i{ width:9px; height:9px; border-radius:50%; display:inline-block; }
-
-/* ---------- FullCalendar theming ---------- */
-.fc{ font-family:var(--font-body); --fc-border-color:var(--line); --fc-today-bg-color:var(--aqua-dim); }
-.fc .fc-toolbar-title{ font-family:var(--font-display); font-size:1.25rem; color:var(--ink); }
-.fc .fc-button{ background:var(--card); border:1.5px solid var(--line); color:var(--teal); font-weight:600; box-shadow:none; text-transform:capitalize; }
-.fc .fc-button:hover{ background:var(--foam); border-color:var(--aqua); }
-.fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active{ background:var(--teal); border-color:var(--teal); color:#fff; }
-.fc .fc-button:focus{ box-shadow:0 0 0 3px var(--aqua-dim); }
-.fc-event{ border:none; padding:1px 2px; cursor:pointer; }
-.fc-daygrid-event{ border-radius:6px; }
-.fc-event .fc-event-time{ font-weight:700; }
-.fc-event.st-pendente{ background:var(--amber-bg); color:#A66A0E; border-left:3px solid var(--amber); }
-.fc-event.st-confirmado{ background:var(--blue-bg); color:#2354BE; border-left:3px solid var(--blue); }
-.fc-event.st-pago{ background:var(--green-bg); color:#1F7A45; border-left:3px solid var(--green); }
-.fc-event.st-cancelado{ background:#EFEFEF; color:#9AA3A3; border-left:3px solid #BBB; text-decoration:line-through; }
-.fc-timegrid-event{ border-radius:6px; }
-.fc-day-today{ }
+.err{ display:none; color:#d93025; font-size:.85rem; font-weight:500; }
+.err.show{ display:block; }
 
 /* ---------- modal ---------- */
 .modal-overlay{
@@ -330,4 +182,3 @@ body.admin{ background:var(--foam); }
   .admin-main{ padding:14px; }
   .stats-grid{ grid-template-columns:1fr; }
 }
-
