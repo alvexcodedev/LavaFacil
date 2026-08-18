@@ -229,6 +229,17 @@ async function enviarAgendamento() {
     }, { merge: true });
 
     goToStep(6);
+
+    // ==========================================
+    // INTEGRAÇÃO WHATSAPP (MENSAGEM DO CLIENTE)
+    // ==========================================
+    const numeroLavaExpresso = "18996746300";
+    const dataFormatada = state.data.split('-').reverse().join('/');
+    const msgCliente = `Olá! Acabei de fazer um agendamento no site.\n\n🚗 *Veículo:* ${state.carroModelo} (${state.placa})\n📅 *Data:* ${dataFormatada} às ${state.horaInicio}\n💧 *Serviço:* ${state.servico.nome}`;
+    
+    // Abre a aba do WhatsApp
+    window.open(`https://wa.me/55${numeroLavaExpresso}?text=${encodeURIComponent(msgCliente)}`, "_blank");
+
   } catch (err) {
     console.error(err);
     showToast("Não foi possível enviar. Tente novamente.", true);
