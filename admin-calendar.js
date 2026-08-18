@@ -1,5 +1,6 @@
 // =========================================================
-// PAINEL ADMIN — calendário, criação/edição/cancelamento
+// PAINEL ADMIN — calendário, criação/edição/cancelamento,
+// estatísticas do dashboard e filtros vindos dos cards.
 // =========================================================
 import { db } from "./firebase-config.js";
 import { SERVICOS } from "./config.js";
@@ -12,9 +13,11 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 let calendar;
-let agendamentosCache = new Map(); // id -> data
+let agendamentosCache = new Map(); // id -> data (com Timestamps do Firestore)
 let modalMode = "create"; // "create" | "edit"
 let editingId = null;
+let statsCallback = null;
+let currentFilter = { status: null, onlyToday: false, label: "" };
 
 function showToast(msg, isError = false) {
   const el = $("#toast");
@@ -25,7 +28,18 @@ function showToast(msg, isError = false) {
   showToast._t = setTimeout(() => el.classList.remove("show"), 3000);
 }
 
-/* ---------------- helpers ---------------- */
+function isHoje(dateObj) {
+  const hoje = new Date();
+  return dateObj.getFullYear() === hoje.getFullYear() &&
+         dateObj.getMonth() === hoje.getMonth() &&
+         dateObj.getDate() === hoje.getDate();
+}
+function isMesAtual(dateObj) {
+  const hoje = new Date();
+  return dateObj.getFullYear() === hoje.getFullYear() && dateObj.getMonth() === hoje.getMonth();
+}
+
+/* ---------------- helpers de evento ---------------- */
 function classNamesFor(a) {
   if (a.status === "cancelado") return ["st-cancelado"];
   if (a.status === "confirmado" && a.pago) return ["st-pago"];
@@ -33,15 +47,80 @@ function classNamesFor(a) {
   if (a.status === "confirmado") return ["st-confirmado"];
   return ["st-pendente"];
 }
-
 function eventTitle(a) {
   const pagoIcon = a.pago ? "💧" : "";
   return `${a.clienteNome.split(" ")[0]} · ${a.servicoNome} ${pagoIcon}`;
 }
-
 function fillServiceSelect() {
   const sel = $("#f-servico");
   sel.innerHTML = SERVICOS.map((s) => `<option value="${s.id}">${s.nome} — R$ ${s.preco.toFixed(2)} (${s.duracaoMin}min)</option>`).join("");
+}
+
+/* ---------------- estatísticas para o dashboard ---------------- */
+function computeStats() {
+  const stats = {
+    pendentes: 0, confirmadosHoje: 0, concluidosHoje: 0,
+    canceladosMes: 0, totalHoje: 0, faturamentoHoje: 0, proximos: [],
+  };
+  const agora = new Date();
+  agendamentosCache.forEach((a, id) => {
+    const ini = a.inicio.toDate();
+    if (a.status === "pendente") stats.pendentes++;
+    if (a.status === "cancelado" && isMesAtual(ini)) stats.canceladosMes++;
+    if (isHoje(ini) && a.status !== "cancelado") {
+      stats.totalHoje++;
+      if (a.status === "confirmado") stats.confirmadosHoje++;
+      if (a.status === "concluido") stats.concluidosHoje++;
+      if (a.pago) stats.faturamentoHoje += a.preco || 0;
+    }
+    if (ini >= agora && a.status !== "cancelado" && a.status !== "concluido") {
+      stats.proximos.push({ ...a, _inicio: ini, _id: id });
+    }
+  });
+  stats.proximos.sort((x, y) => x._inicio - y._inicio);
+  stats.proximos = stats.proximos.slice(0, 5);
+  return stats;
+}
+
+export function onStats(cb) {
+  statsCallback = cb;
+}
+
+/* ---------------- filtro aplicado ao calendário ---------------- */
+function eventoPassaNoFiltro(a, iniDate) {
+  if (currentFilter.status && a.status !== currentFilter.status) return false;
+  if (currentFilter.onlyToday && !isHoje(iniDate)) return false;
+  return true;
+}
+
+function renderEventosFiltrados() {
+  if (!calendar) return;
+  calendar.removeAllEvents();
+  agendamentosCache.forEach((a, id) => {
+    const ini = a.inicio.toDate();
+    if (!eventoPassaNoFiltro(a, ini)) return;
+    calendar.addEvent({
+      id, title: eventTitle(a), start: ini, end: a.fim.toDate(), classNames: classNamesFor(a),
+    });
+  });
+}
+
+export function setFilter({ status = null, onlyToday = false, label = "", view = null } = {}) {
+  currentFilter = { status, onlyToday, label };
+  renderEventosFiltrados();
+  const chip = $("#filter-chip");
+  if (label) {
+    chip.hidden = false;
+    chip.querySelector(".label").textContent = label;
+  } else {
+    chip.hidden = true;
+  }
+  if (view && calendar) calendar.changeView(view);
+  if (onlyToday && calendar) calendar.gotoDate(new Date());
+}
+
+export function clearFilter() {
+  setFilter({});
 }
 
 /* ---------------- calendário ---------------- */
@@ -52,8 +131,8 @@ export function initCalendar() {
     locale: "pt-br",
     height: "auto",
     initialView: "dayGridMonth",
-    headerToolbar: { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay" },
-    buttonText: { today: "Hoje", month: "Mês", week: "Semana", day: "Dia" },
+    headerToolbar: { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek" },
+    buttonText: { today: "Hoje", month: "Mês", week: "Semana", day: "Dia", list: "Lista" },
     slotMinTime: "07:00:00",
     slotMaxTime: "20:00:00",
     editable: true,
@@ -62,38 +141,20 @@ export function initCalendar() {
     nowIndicator: true,
     dayMaxEvents: 3,
     events: [],
-    eventClick(info) {
-      openEditModal(info.event.id);
-    },
-    dateClick(info) {
-      openCreateModal(info.date);
-    },
-    eventDrop(info) {
-      reagendar(info.event.id, info.event.start);
-    },
+    eventClick(info) { openEditModal(info.event.id); },
+    dateClick(info) { openCreateModal(info.date); },
+    eventDrop(info) { reagendar(info.event.id, info.event.start); },
   });
   calendar.render();
 
+  $("#filter-chip-clear").addEventListener("click", clearFilter);
+
   onSnapshot(query(collection(db, "agendamentos"), orderBy("inicio", "asc")), (snap) => {
     agendamentosCache.clear();
-    const events = [];
-    let pendentes = 0;
-    snap.forEach((d) => {
-      const a = d.data();
-      agendamentosCache.set(d.id, a);
-      if (a.status === "pendente") pendentes++;
-      events.push({
-        id: d.id,
-        title: eventTitle(a),
-        start: a.inicio.toDate(),
-        end: a.fim.toDate(),
-        classNames: classNamesFor(a),
-      });
-    });
-    calendar.removeAllEvents();
-    events.forEach((e) => calendar.addEvent(e));
-    $("#pending-count").textContent = pendentes;
-    $("#pending-pill").hidden = pendentes === 0;
+    snap.forEach((d) => agendamentosCache.set(d.id, d.data()));
+    renderEventosFiltrados();
+    const stats = computeStats();
+    statsCallback?.(stats);
   });
 }
 
@@ -122,7 +183,6 @@ function resetForm() {
   $("#f-pago").checked = false;
   $("#modal-delete-row").hidden = true;
 }
-
 function setStatusChip(v) {
   $$(".status-chip").forEach((c) => c.classList.toggle("active", c.dataset.v === v));
   $("#f-status-hidden").value = v;
@@ -147,7 +207,7 @@ function openCreateModal(date) {
   $("#modal-overlay").classList.add("open");
 }
 
-function openEditModal(id) {
+export function openEditModal(id) {
   const a = agendamentosCache.get(id);
   if (!a) return;
   modalMode = "edit";
