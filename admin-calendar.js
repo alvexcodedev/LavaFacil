@@ -13,11 +13,13 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 let calendar;
-let agendamentosCache = new Map(); // id -> data (com Timestamps do Firestore)
+let agendamentosCache = new Map();
 let modalMode = "create"; // "create" | "edit"
 let editingId = null;
 let statsCallback = null;
-let currentFilter = { status: null, onlyToday: false, label: "" };
+
+// ADICIONADO: Propriedade "pago" para o filtro do Dashboard
+let currentFilter = { status: null, onlyToday: false, pago: null, label: "" };
 
 function showToast(msg, isError = false) {
   const el = $("#toast");
@@ -34,12 +36,12 @@ function isHoje(dateObj) {
          dateObj.getMonth() === hoje.getMonth() &&
          dateObj.getDate() === hoje.getDate();
 }
+
 function isMesAtual(dateObj) {
   const hoje = new Date();
   return dateObj.getFullYear() === hoje.getFullYear() && dateObj.getMonth() === hoje.getMonth();
 }
-// formata pra "YYYY-MM-DD" usando o horário LOCAL (nunca usar toISOString() aqui —
-// ele converte pra UTC e desloca o dia à noite, já que o Brasil está atrás do UTC).
+
 function localDateStr(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -55,10 +57,12 @@ function classNamesFor(a) {
   if (a.status === "confirmado") return ["st-confirmado"];
   return ["st-pendente"];
 }
+
 function eventTitle(a) {
   const pagoIcon = a.pago ? "💧" : "";
   return `${a.clienteNome.split(" ")[0]} · ${a.servicoNome} ${pagoIcon}`;
 }
+
 function fillServiceSelect() {
   const sel = $("#f-servico");
   sel.innerHTML = SERVICOS.map((s) => `<option value="${s.id}">${s.nome} — R$ ${s.preco.toFixed(2)} (${s.duracaoMin}min)</option>`).join("");
@@ -98,24 +102,26 @@ export function onStats(cb) {
 function eventoPassaNoFiltro(a, iniDate) {
   if (currentFilter.status && a.status !== currentFilter.status) return false;
   if (currentFilter.onlyToday && !isHoje(iniDate)) return false;
+  // NOVO: Exclusivo para o filtro de Faturamento (Pagos hoje)
+  if (currentFilter.pago === true && !a.pago) return false; 
   return true;
 }
 
+// CORREÇÃO: Utilizando a re-renderização nativa do FullCalendar em vez de remove/add manual
 function renderEventosFiltrados() {
-  if (!calendar) return;
-  calendar.removeAllEvents();
-  agendamentosCache.forEach((a, id) => {
-    const ini = a.inicio.toDate();
-    if (!eventoPassaNoFiltro(a, ini)) return;
-    calendar.addEvent({
-      id, title: eventTitle(a), start: ini, end: a.fim.toDate(), classNames: classNamesFor(a),
-    });
-  });
+  if (calendar) {
+    calendar.refetchEvents();
+  }
 }
 
-export function setFilter({ status = null, onlyToday = false, label = "", view = null } = {}) {
-  currentFilter = { status, onlyToday, label };
+export function setFilter({ status = null, onlyToday = false, pago = null, label = "", view = null } = {}) {
+  currentFilter = { status, onlyToday, pago, label };
+  
+  if (view && calendar) calendar.changeView(view);
+  if (onlyToday && calendar) calendar.gotoDate(new Date());
+
   renderEventosFiltrados();
+  
   const chip = $("#filter-chip");
   if (label) {
     chip.hidden = false;
@@ -123,8 +129,6 @@ export function setFilter({ status = null, onlyToday = false, label = "", view =
   } else {
     chip.hidden = true;
   }
-  if (view && calendar) calendar.changeView(view);
-  if (onlyToday && calendar) calendar.gotoDate(new Date());
 }
 
 export function clearFilter() {
@@ -152,7 +156,26 @@ export function initCalendar() {
     eventDurationEditable: false,
     nowIndicator: true,
     dayMaxEvents: 3,
-    events: [],
+    
+    // CORREÇÃO: Função nativa de eventos. Filtra do Cache e desenha com segurança.
+    events: function(fetchInfo, successCallback, failureCallback) {
+      const eventosFiltrados = [];
+      agendamentosCache.forEach((a, id) => {
+        const ini = a.inicio.toDate();
+        if (eventoPassaNoFiltro(a, ini)) {
+          eventosFiltrados.push({
+            id: id,
+            title: eventTitle(a),
+            start: ini,
+            end: a.fim.toDate(),
+            classNames: classNamesFor(a),
+            allDay: false // CORREÇÃO DA VISÃO DO DIA: Obriga a descer pra grade de hora
+          });
+        }
+      });
+      successCallback(eventosFiltrados);
+    },
+
     eventClick(info) { openEditModal(info.event.id); },
     dateClick(info) { openCreateModal(info.date); },
     eventDrop(info) { reagendar(info.event.id, info.event.start); },
@@ -195,6 +218,7 @@ function resetForm() {
   $("#f-pago").checked = false;
   $("#modal-delete-row").hidden = true;
 }
+
 function setStatusChip(v) {
   $$(".status-chip").forEach((c) => c.classList.toggle("active", c.dataset.v === v));
   $("#f-status-hidden").value = v;
