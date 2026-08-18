@@ -71,7 +71,7 @@
             <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="stat-num">0</div>
-          <div class="stat-label">Aguardando confirmação</div>
+          <div class="stat-label">Pendentes</div>
         </button>
 
         <button type="button" class="stat-card blue" id="stat-confirmados">
@@ -80,7 +80,7 @@
             <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="stat-num">0</div>
-          <div class="stat-label">Confirmados hoje</div>
+          <div class="stat-label">Confirmados</div>
         </button>
 
         <button type="button" class="stat-card green" id="stat-concluidos">
@@ -89,7 +89,7 @@
             <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="stat-num">0</div>
-          <div class="stat-label">Concluídos hoje</div>
+          <div class="stat-label">Concluídos</div>
         </button>
 
         <button type="button" class="stat-card red" id="stat-cancelados">
@@ -98,7 +98,7 @@
             <svg class="stat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="stat-num">0</div>
-          <div class="stat-label">Cancelados neste mês</div>
+          <div class="stat-label">Cancelados</div>
         </button>
 
         <button type="button" class="stat-card teal" id="stat-total">
@@ -130,7 +130,18 @@
     <div class="admin-view" id="view-agenda">
       <div class="admin-toolbar-row">
         <h1>Agenda</h1>
-        <button class="btn btn-primary btn-sm" id="btn-novo-agendamento-2">+ Novo agendamento</button>
+        
+        <!-- === NOVO FILTRO ADICIONADO AQUI === -->
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <select id="agenda-status-filter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); background: #fff; font-family: inherit; font-size: 0.9rem; cursor: pointer; color: var(--text);">
+            <option value="">Todos os status</option>
+            <option value="pendente">Pendentes</option>
+            <option value="confirmado">Confirmados</option>
+            <option value="concluido">Concluídos</option>
+            <option value="cancelado">Cancelados</option>
+          </select>
+          <button class="btn btn-primary btn-sm" id="btn-novo-agendamento-2">+ Novo agendamento</button>
+        </div>
       </div>
 
       <div class="filter-chip" id="filter-chip" hidden>
@@ -250,14 +261,12 @@
       document.querySelectorAll(".admin-view").forEach((v) => v.classList.remove("active"));
       document.getElementById(`view-${tab.dataset.view}`).classList.add("active");
       if (tab.dataset.view === "agenda") {
-        // o calendário foi montado enquanto essa aba estava escondida —
-        // precisa remedir o tamanho agora que ficou visível.
         requestAnimationFrame(() => resizeCalendar());
       }
     });
   });
 
-  // o botão "+ Novo agendamento" existe duplicado (painel e agenda) — ambos abrem o mesmo modal
+  // o botão "+ Novo agendamento" existe duplicado
   document.getElementById("btn-novo-agendamento-2").addEventListener("click", () => {
     document.getElementById("btn-novo-agendamento").click();
   });
