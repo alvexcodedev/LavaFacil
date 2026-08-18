@@ -74,7 +74,8 @@
         <div class="step-dot active">1</div><div class="step-line"></div>
         <div class="step-dot">2</div><div class="step-line"></div>
         <div class="step-dot">3</div><div class="step-line"></div>
-        <div class="step-dot">4</div>
+        <div class="step-dot">4</div><div class="step-line"></div>
+        <div class="step-dot">5</div>
       </div>
 
       <!-- Passo 1: dados do cliente -->
@@ -152,6 +153,16 @@
         <div class="step-actions">
           <button class="btn btn-outline" id="btn-step4-back-2" onclick="document.getElementById('btn-step4-back').click()">Voltar</button>
           <button class="btn btn-primary" id="btn-confirmar">Confirmar solicitação</button>
+        </div>
+      </div>
+
+      <!-- Passo 6: Sucesso / Confirmação -->
+      <div class="step-panel" data-step="6" hidden>
+        <div style="text-align:center; padding: 20px 0;">
+          <div style="width: 60px; height: 60px; background: var(--green-bg); color: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 16px auto;">✓</div>
+          <h3 style="margin-bottom:8px;">Solicitação enviada!</h3>
+          <p style="color:var(--muted); font-size:0.95rem; margin-bottom:24px;">Recebemos o seu pedido. Nossa equipe entrará em contato para confirmar o horário.</p>
+          <button class="btn btn-primary" onclick="window.location.reload()">Fazer novo agendamento</button>
         </div>
       </div>
 
