@@ -38,6 +38,14 @@ function isMesAtual(dateObj) {
   const hoje = new Date();
   return dateObj.getFullYear() === hoje.getFullYear() && dateObj.getMonth() === hoje.getMonth();
 }
+// formata pra "YYYY-MM-DD" usando o horário LOCAL (nunca usar toISOString() aqui —
+// ele converte pra UTC e desloca o dia à noite, já que o Brasil está atrás do UTC).
+function localDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 /* ---------------- helpers de evento ---------------- */
 function classNamesFor(a) {
@@ -200,12 +208,12 @@ function openCreateModal(date) {
   $("#modal-sub").textContent = "Preencha os dados — o horário já entra como confirmado.";
   setStatusChip("confirmado");
   if (date) {
-    $("#f-data").value = date.toISOString().slice(0, 10);
+    $("#f-data").value = localDateStr(date);
     const hh = String(date.getHours()).padStart(2, "0");
     const mm = String(date.getMinutes()).padStart(2, "0");
     $("#f-hora").value = date.getHours() ? `${hh}:${mm}` : "09:00";
   } else {
-    $("#f-data").value = new Date().toISOString().slice(0, 10);
+    $("#f-data").value = localDateStr(new Date());
     $("#f-hora").value = "09:00";
   }
   $("#modal-overlay").classList.add("open");
@@ -226,7 +234,7 @@ export function openEditModal(id) {
   $("#f-placa").value = a.placa;
   $("#f-servico").value = a.servicoId;
   const ini = a.inicio.toDate();
-  $("#f-data").value = ini.toISOString().slice(0, 10);
+  $("#f-data").value = localDateStr(ini);
   $("#f-hora").value = `${String(ini.getHours()).padStart(2, "0")}:${String(ini.getMinutes()).padStart(2, "0")}`;
   $("#f-obs").value = a.observacoes || "";
   $("#f-pago").checked = !!a.pago;
