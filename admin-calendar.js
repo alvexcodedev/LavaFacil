@@ -18,7 +18,6 @@ let modalMode = "create"; // "create" | "edit"
 let editingId = null;
 let statsCallback = null;
 
-// Filtro do Dashboard (inclui filtro de 'pago')
 let currentFilter = { status: null, onlyToday: false, pago: null, label: "" };
 
 function showToast(msg, isError = false) {
@@ -35,11 +34,6 @@ function isHoje(dateObj) {
   return dateObj.getFullYear() === hoje.getFullYear() &&
          dateObj.getMonth() === hoje.getMonth() &&
          dateObj.getDate() === hoje.getDate();
-}
-
-function isMesAtual(dateObj) {
-  const hoje = new Date();
-  return dateObj.getFullYear() === hoje.getFullYear() && dateObj.getMonth() === hoje.getMonth();
 }
 
 function localDateStr(d) {
@@ -71,20 +65,25 @@ function fillServiceSelect() {
 /* ---------------- estatísticas para o dashboard ---------------- */
 function computeStats() {
   const stats = {
-    pendentes: 0, confirmadosHoje: 0, concluidosHoje: 0,
-    canceladosMes: 0, totalHoje: 0, faturamentoHoje: 0, proximos: [],
+    pendentes: 0, confirmadosGerais: 0, concluidosGerais: 0,
+    canceladosGerais: 0, totalHoje: 0, faturamentoHoje: 0, proximos: [],
   };
   const agora = new Date();
   agendamentosCache.forEach((a, id) => {
     const ini = a.inicio.toDate();
+    
+    // Contagem GERAL (Independente do dia/mês)
     if (a.status === "pendente") stats.pendentes++;
-    if (a.status === "cancelado" && isMesAtual(ini)) stats.canceladosMes++;
+    if (a.status === "confirmado") stats.confirmadosGerais++;
+    if (a.status === "concluido") stats.concluidosGerais++;
+    if (a.status === "cancelado") stats.canceladosGerais++;
+
+    // Contagem HOJE
     if (isHoje(ini) && a.status !== "cancelado") {
       stats.totalHoje++;
-      if (a.status === "confirmado") stats.confirmadosHoje++;
-      if (a.status === "concluido") stats.concluidosHoje++;
       if (a.pago) stats.faturamentoHoje += a.preco || 0;
     }
+    
     if (ini >= agora && a.status !== "cancelado" && a.status !== "concluido") {
       stats.proximos.push({ ...a, _inicio: ini, _id: id });
     }
@@ -100,6 +99,7 @@ export function onStats(cb) {
 
 /* ---------------- filtro aplicado ao calendário ---------------- */
 function eventoPassaNoFiltro(a, iniDate) {
+  // Agora os filtros funcionam em conjunto (ex: Hoje + Pendente)
   if (currentFilter.status && a.status !== currentFilter.status) return false;
   if (currentFilter.onlyToday && !isHoje(iniDate)) return false;
   if (currentFilter.pago === true && !a.pago) return false; 
@@ -113,13 +113,19 @@ function renderEventosFiltrados() {
 }
 
 export function setFilter({ status = null, onlyToday = false, pago = null, label = "", view = null } = {}) {
+  // Sobrepõe o filtro atual com o que veio do Card do Dashboard
   currentFilter = { status, onlyToday, pago, label };
   
   if (view && calendar) calendar.changeView(view);
   if (onlyToday && calendar) calendar.gotoDate(new Date());
 
-  renderEventosFiltrados();
-  
+  // 1. Sincroniza o select nativo da agenda para refletir o status
+  const selectAgenda = $("#agenda-status-filter");
+  if (selectAgenda) {
+    selectAgenda.value = status || "";
+  }
+
+  // 2. Sincroniza a tag "Filtro: [Nome]" (Chip)
   const chip = $("#filter-chip");
   if (label) {
     chip.hidden = false;
@@ -127,10 +133,23 @@ export function setFilter({ status = null, onlyToday = false, pago = null, label
   } else {
     chip.hidden = true;
   }
+
+  renderEventosFiltrados();
 }
 
 export function clearFilter() {
-  setFilter({});
+  // Reseta completamente as variáveis de filtro
+  currentFilter = { status: null, onlyToday: false, pago: null, label: "" };
+  
+  // Reseta o visual do select para "Todos os status"
+  const selectAgenda = $("#agenda-status-filter");
+  if (selectAgenda) selectAgenda.value = "";
+
+  // Oculta a chip
+  const chip = $("#filter-chip");
+  if (chip) chip.hidden = true;
+
+  renderEventosFiltrados();
 }
 
 export function resizeCalendar() {
@@ -167,7 +186,6 @@ export function initCalendar() {
             end: a.fim.toDate(),
             classNames: classNamesFor(a),
             allDay: false, 
-            // Guardando os dados para usarmos no Tooltip
             extendedProps: {
               cliente: a.clienteNome,
               carro: a.carroModelo,
@@ -180,7 +198,6 @@ export function initCalendar() {
       successCallback(eventosFiltrados);
     },
 
-    // Criando o tooltip (balão de texto) ao passar o mouse
     eventDidMount: function(info) {
       const p = info.event.extendedProps;
       const balaoDeTexto = `Cliente: ${p.cliente}\nCarro: ${p.carro}\nPlaca: ${p.placa}\nServiço: ${p.servico}`;
@@ -385,4 +402,14 @@ export function bindAdminUI() {
   $("#btn-cancelar-agendamento").addEventListener("click", cancelarAgendamento);
   $("#btn-excluir-agendamento").addEventListener("click", excluirAgendamento);
   $$(".status-chip").forEach((c) => c.addEventListener("click", () => setStatusChip(c.dataset.v)));
+
+  const selectAgenda = $("#agenda-status-filter");
+  if (selectAgenda) {
+    selectAgenda.addEventListener("change", (e) => {
+      // O SEGREDO AQUI: Em vez de sobrescrever tudo, apenas atualiza a propriedade 
+      // de "status" dentro do objeto de filtro que já está funcionando no momento.
+      currentFilter.status = e.target.value || null;
+      renderEventosFiltrados();
+    });
+  }
 }
