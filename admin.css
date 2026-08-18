@@ -123,3 +123,50 @@ body.admin{ background:var(--foam); }
 .err.show {
   display: block;
 }
+
+/* ---------- Formulários & Inputs ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+/* Estilo unificado para inputs, selects e textareas */
+.field input,
+.field select,
+.field textarea {
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background-color: #ffffff;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  transition: all 0.2s ease;
+  outline: none;
+  width: 100%;
+}
+
+/* Estado de foco (quando o usuário clica para digitar) */
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--aqua-dim);
+}
+
+/* Espaçamento em linha para o modal de agendamento */
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+.field-row .field {
+  flex: 1;
+}
