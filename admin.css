@@ -44,7 +44,7 @@ body.admin{ background:var(--foam); }
 .fc{ 
   font-family:var(--font-body); 
   --fc-border-color:var(--line); 
-  --fc-today-bg-color:rgba(0,0,0,0.02); /* Fundo limpo e neutro para o dia de hoje */
+  --fc-today-bg-color:rgba(0,0,0,0.06); /* Fundo limpo e neutro para o dia de hoje */
 }
 .fc .fc-toolbar-title{ font-family:var(--font-display); font-size:1.25rem; color:var(--ink); }
 .fc .fc-button{ background:var(--card); border:1.5px solid var(--line); color:var(--teal); font-weight:600; box-shadow:none; text-transform:capitalize; }
