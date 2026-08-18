@@ -99,7 +99,6 @@ export function onStats(cb) {
 
 /* ---------------- filtro aplicado ao calendário ---------------- */
 function eventoPassaNoFiltro(a, iniDate) {
-  // Agora os filtros funcionam em conjunto (ex: Hoje + Pendente)
   if (currentFilter.status && a.status !== currentFilter.status) return false;
   if (currentFilter.onlyToday && !isHoje(iniDate)) return false;
   if (currentFilter.pago === true && !a.pago) return false; 
@@ -113,19 +112,16 @@ function renderEventosFiltrados() {
 }
 
 export function setFilter({ status = null, onlyToday = false, pago = null, label = "", view = null } = {}) {
-  // Sobrepõe o filtro atual com o que veio do Card do Dashboard
   currentFilter = { status, onlyToday, pago, label };
   
   if (view && calendar) calendar.changeView(view);
   if (onlyToday && calendar) calendar.gotoDate(new Date());
 
-  // 1. Sincroniza o select nativo da agenda para refletir o status
   const selectAgenda = $("#agenda-status-filter");
   if (selectAgenda) {
     selectAgenda.value = status || "";
   }
 
-  // 2. Sincroniza a tag "Filtro: [Nome]" (Chip)
   const chip = $("#filter-chip");
   if (label) {
     chip.hidden = false;
@@ -138,14 +134,11 @@ export function setFilter({ status = null, onlyToday = false, pago = null, label
 }
 
 export function clearFilter() {
-  // Reseta completamente as variáveis de filtro
   currentFilter = { status: null, onlyToday: false, pago: null, label: "" };
   
-  // Reseta o visual do select para "Todos os status"
   const selectAgenda = $("#agenda-status-filter");
   if (selectAgenda) selectAgenda.value = "";
 
-  // Oculta a chip
   const chip = $("#filter-chip");
   if (chip) chip.hidden = true;
 
@@ -346,6 +339,18 @@ async function salvarAgendamento(e) {
     status, pago, observacoes,
   };
 
+  // ==========================================
+  // LÓGICA DO WHATSAPP (MENSAGEM DO ADMIN)
+  // Verifica se o status mudou para "confirmado"
+  // ==========================================
+  let dispararWhatsApp = false;
+  if (modalMode === "edit") {
+    const agendamentoAntigo = agendamentosCache.get(editingId);
+    if (agendamentoAntigo && agendamentoAntigo.status !== "confirmado" && status === "confirmado") {
+      dispararWhatsApp = true;
+    }
+  }
+
   const btn = $("#btn-salvar");
   btn.disabled = true;
   try {
@@ -359,7 +364,19 @@ async function salvarAgendamento(e) {
     await setDoc(doc(db, "clientes", placa), {
       nome, telefone, carroModelo, placa, atualizadoEm: serverTimestamp(),
     }, { merge: true });
+    
     closeModal();
+
+    // Se confirmou o agendamento, abre a aba do WhatsApp Web para falar com o cliente
+    if (dispararWhatsApp) {
+      const primeiroNome = nome.split(" ")[0];
+      const dataFormatada = data.split("-").reverse().join("/");
+      const msg = `Olá, ${primeiroNome}! Seu agendamento na Lava Expresso para a lavagem do ${carroModelo} no dia ${dataFormatada} às ${hora} foi confirmado. Te esperamos!`;
+      
+      const numeroLimpo = telefone.replace(/\D/g, ""); // Extrai apenas os números do telefone
+      window.open(`https://wa.me/55${numeroLimpo}?text=${encodeURIComponent(msg)}`, "_blank");
+    }
+
   } catch (err) {
     console.error(err);
     showToast("Erro ao salvar. Tente novamente.", true);
@@ -406,8 +423,6 @@ export function bindAdminUI() {
   const selectAgenda = $("#agenda-status-filter");
   if (selectAgenda) {
     selectAgenda.addEventListener("change", (e) => {
-      // O SEGREDO AQUI: Em vez de sobrescrever tudo, apenas atualiza a propriedade 
-      // de "status" dentro do objeto de filtro que já está funcionando no momento.
       currentFilter.status = e.target.value || null;
       renderEventosFiltrados();
     });
