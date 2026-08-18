@@ -4,7 +4,7 @@
 import { db } from "./firebase-config.js";
 import { SERVICOS, HORARIO_FUNCIONAMENTO, TELEFONE_NEGOCIO } from "./config.js";
 import {
-  collection, addDoc, doc, setDoc, query, where, getDocs,
+  collection, addDoc, doc, setDoc, getDoc, query, where, getDocs,
   Timestamp, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -53,10 +53,7 @@ function goToStep(n) {
     d.classList.toggle("done", i + 1 < n);
   });
   $$(".step-line").forEach((l, i) => l.classList.toggle("done", i + 1 < n));
-  
-  // CORREÇÃO: O resumo só deve ser renderizado no Passo 5
-  if (n === 5) renderResumo();
-  
+  if (n === 4) renderResumo();
   $("#ticket").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -109,6 +106,14 @@ function minutesToHHMM(min) {
   const m = String(min % 60).padStart(2, "0");
   return `${h}:${m}`;
 }
+// formata pra "YYYY-MM-DD" usando o horário LOCAL — nunca toISOString() aqui,
+// pois ele converte pra UTC e desloca o dia à noite (Brasil está atrás do UTC).
+function localDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 async function buscarAgendamentosDoDia(dataStr) {
   const inicioDia = new Date(`${dataStr}T00:00:00`);
@@ -148,13 +153,7 @@ async function renderSlots() {
   const duracao = state.servico.duracaoMin;
 
   const agora = new Date();
-  
-  // CORREÇÃO: Fuso horário local do Brasil para validar se a data escolhida é "hoje"
-  const dataHojeLocal = agora.getFullYear() + "-" + 
-                        String(agora.getMonth() + 1).padStart(2, '0') + "-" + 
-                        String(agora.getDate()).padStart(2, '0');
-                        
-  const ehHoje = dataStr === dataHojeLocal;
+  const ehHoje = dataStr === localDateStr(agora);
   const minMinutosHoje = agora.getHours() * 60 + agora.getMinutes() + HORARIO_FUNCIONAMENTO.antecedenciaMinMin;
 
   const slots = [];
@@ -229,8 +228,7 @@ async function enviarAgendamento() {
       atualizadoEm: serverTimestamp(),
     }, { merge: true });
 
-    // Avança para a tela final de sucesso (que precisa ser criada ou direcionada)
-    goToStep(6); 
+    goToStep(6);
   } catch (err) {
     console.error(err);
     showToast("Não foi possível enviar. Tente novamente.", true);
@@ -278,18 +276,27 @@ function bind() {
   $("#btn-confirmar").addEventListener("click", enviarAgendamento);
 
   const min = new Date();
-  
-  // CORREÇÃO: Fuso horário local para o calendário <input type="date">
-  const minDataLocal = min.getFullYear() + "-" + 
-                       String(min.getMonth() + 1).padStart(2, '0') + "-" + 
-                       String(min.getDate()).padStart(2, '0');
-                       
-  $("#input-data").min = minDataLocal;
-
-  $("#telefone-negocio").textContent = TELEFONE_NEGOCIO;
+  $("#input-data").min = localDateStr(min);
 }
 
-document.addEventListener("DOMContentLoaded", bind);
+function aplicarServicoDaURL() {
+  const params = new URLSearchParams(window.location.search);
+  const servicoId = params.get("servico");
+  if (!servicoId) return;
+  const servico = SERVICOS.find((s) => s.id === servicoId);
+  if (!servico) return;
+  state.servico = servico;
+  const card = document.querySelector(`.service-card[data-id="${servico.id}"]`);
+  if (card) {
+    card.classList.add("selected");
+    $("#btn-step3-next").disabled = false;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  bind();
+  aplicarServicoDaURL();
+});
 
 // pequenas revelações ao rolar
 document.addEventListener("DOMContentLoaded", () => {
