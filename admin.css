@@ -110,3 +110,16 @@ body.admin{ background:var(--foam); }
   .fc .fc-toolbar{ flex-direction:column; gap:10px; }
   .admin-main{ padding:14px; }
 }
+
+/* Oculta a mensagem de erro por padrão */
+.err {
+  display: none;
+  color: #d93025; /* Vermelho para dar destaque ao erro */
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* O JavaScript adiciona essa classe para mostrar o erro quando o login falha */
+.err.show {
+  display: block;
+}
