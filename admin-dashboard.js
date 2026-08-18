@@ -59,8 +59,10 @@ export function initDashboard() {
     { id: "stat-concluidos", filter: { status: "concluido", onlyToday: true, label: "Concluídos hoje", view: "timeGridDay" } },
     { id: "stat-cancelados", filter: { status: "cancelado", label: "Cancelados neste mês", view: "dayGridMonth" } },
     { id: "stat-total", filter: { onlyToday: true, label: "Hoje", view: "timeGridDay" } },
-    { id: "stat-faturamento", filter: { onlyToday: true, label: "Pagos hoje", view: "timeGridDay" } },
+    // CORREÇÃO: Adicionado pago: true para o card de faturamento funcionar corretamente no filtro
+    { id: "stat-faturamento", filter: { onlyToday: true, pago: true, label: "Pagos hoje", view: "timeGridDay" } },
   ];
+  
   cards.forEach(({ id, filter }) => {
     $(`#${id}`).addEventListener("click", () => {
       setFilter(filter);
