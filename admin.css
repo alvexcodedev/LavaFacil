@@ -41,20 +41,29 @@ body.admin{ background:var(--foam); }
 .legend i{ width:9px; height:9px; border-radius:50%; display:inline-block; }
 
 /* ---------- FullCalendar theming ---------- */
-.fc{ font-family:var(--font-body); --fc-border-color:var(--line); --fc-today-bg-color:var(--aqua-dim); }
+.fc{ 
+  font-family:var(--font-body); 
+  --fc-border-color:var(--line); 
+  --fc-today-bg-color:rgba(0,0,0,0.02); /* Fundo limpo e neutro para o dia de hoje */
+}
 .fc .fc-toolbar-title{ font-family:var(--font-display); font-size:1.25rem; color:var(--ink); }
 .fc .fc-button{ background:var(--card); border:1.5px solid var(--line); color:var(--teal); font-weight:600; box-shadow:none; text-transform:capitalize; }
 .fc .fc-button:hover{ background:var(--foam); border-color:var(--aqua); }
 .fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active{ background:var(--teal); border-color:var(--teal); color:#fff; }
 .fc .fc-button:focus{ box-shadow:0 0 0 3px var(--aqua-dim); }
-.fc-event{ border:none; padding:1px 2px; cursor:pointer; }
+
+/* Ajuste fino dos eventos na grade */
+.fc-event{ border:none; padding:2px 4px; cursor:pointer; }
 .fc-daygrid-event{ border-radius:6px; }
-.fc-event .fc-event-time{ font-weight:700; }
+.fc-timegrid-event{ border-radius:6px; margin-bottom: 2px; }
+.fc-event .fc-event-main { color: var(--ink); font-size: 0.85rem; } /* Garante que o texto fique escuro e legível */
+.fc-event .fc-event-time{ font-weight:700; margin-right: 4px; color: inherit; }
+
+/* Status dos eventos - as cores que você já havia definido */
 .fc-event.st-pendente{ background:var(--amber-bg); color:#A66A0E; border-left:3px solid var(--amber); }
 .fc-event.st-confirmado{ background:var(--blue-bg); color:#2354BE; border-left:3px solid var(--blue); }
 .fc-event.st-pago{ background:var(--green-bg); color:#1F7A45; border-left:3px solid var(--green); }
 .fc-event.st-cancelado{ background:#EFEFEF; color:#9AA3A3; border-left:3px solid #BBB; text-decoration:line-through; }
-.fc-timegrid-event{ border-radius:6px; }
 .fc-day-today{ }
 
 /* ---------- modal ---------- */
