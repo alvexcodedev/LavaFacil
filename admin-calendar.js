@@ -123,6 +123,10 @@ export function clearFilter() {
   setFilter({});
 }
 
+export function resizeCalendar() {
+  calendar?.updateSize();
+}
+
 /* ---------------- calendário ---------------- */
 export function initCalendar() {
   fillServiceSelect();
