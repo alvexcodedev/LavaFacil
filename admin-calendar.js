@@ -18,7 +18,7 @@ let modalMode = "create"; // "create" | "edit"
 let editingId = null;
 let statsCallback = null;
 
-// ADICIONADO: Propriedade "pago" para o filtro do Dashboard
+// Filtro do Dashboard (inclui filtro de 'pago')
 let currentFilter = { status: null, onlyToday: false, pago: null, label: "" };
 
 function showToast(msg, isError = false) {
@@ -102,12 +102,10 @@ export function onStats(cb) {
 function eventoPassaNoFiltro(a, iniDate) {
   if (currentFilter.status && a.status !== currentFilter.status) return false;
   if (currentFilter.onlyToday && !isHoje(iniDate)) return false;
-  // NOVO: Exclusivo para o filtro de Faturamento (Pagos hoje)
   if (currentFilter.pago === true && !a.pago) return false; 
   return true;
 }
 
-// CORREÇÃO: Utilizando a re-renderização nativa do FullCalendar em vez de remove/add manual
 function renderEventosFiltrados() {
   if (calendar) {
     calendar.refetchEvents();
@@ -157,7 +155,6 @@ export function initCalendar() {
     nowIndicator: true,
     dayMaxEvents: 3,
     
-    // CORREÇÃO: Função nativa de eventos. Filtra do Cache e desenha com segurança.
     events: function(fetchInfo, successCallback, failureCallback) {
       const eventosFiltrados = [];
       agendamentosCache.forEach((a, id) => {
@@ -169,11 +166,25 @@ export function initCalendar() {
             start: ini,
             end: a.fim.toDate(),
             classNames: classNamesFor(a),
-            allDay: false // CORREÇÃO DA VISÃO DO DIA: Obriga a descer pra grade de hora
+            allDay: false, 
+            // Guardando os dados para usarmos no Tooltip
+            extendedProps: {
+              cliente: a.clienteNome,
+              carro: a.carroModelo,
+              placa: a.placa,
+              servico: a.servicoNome
+            }
           });
         }
       });
       successCallback(eventosFiltrados);
+    },
+
+    // Criando o tooltip (balão de texto) ao passar o mouse
+    eventDidMount: function(info) {
+      const p = info.event.extendedProps;
+      const balaoDeTexto = `Cliente: ${p.cliente}\nCarro: ${p.carro}\nPlaca: ${p.placa}\nServiço: ${p.servico}`;
+      info.el.setAttribute("title", balaoDeTexto);
     },
 
     eventClick(info) { openEditModal(info.event.id); },
