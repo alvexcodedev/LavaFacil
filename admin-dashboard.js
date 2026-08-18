@@ -43,9 +43,9 @@ function goToAgenda() {
 
 function renderStats(stats) {
   $("#stat-pendentes .stat-num").textContent = stats.pendentes;
-  $("#stat-confirmados .stat-num").textContent = stats.confirmadosHoje;
-  $("#stat-concluidos .stat-num").textContent = stats.concluidosHoje;
-  $("#stat-cancelados .stat-num").textContent = stats.canceladosMes;
+  $("#stat-confirmados .stat-num").textContent = stats.confirmadosGerais;
+  $("#stat-concluidos .stat-num").textContent = stats.concluidosGerais;
+  $("#stat-cancelados .stat-num").textContent = stats.canceladosGerais;
   $("#stat-total .stat-num").textContent = stats.totalHoje;
   $("#stat-faturamento .stat-num").textContent = fmtMoeda(stats.faturamentoHoje);
 
@@ -53,14 +53,18 @@ function renderStats(stats) {
 }
 
 export function initDashboard() {
+  // AQUI ESTÁ A CORREÇÃO:
+  // Removido o 'onlyToday: true' dos cards de status gerais.
+  // Adicionado 'label' para mostrar na chip flutuante da agenda.
   const cards = [
-    { id: "stat-pendentes", filter: { status: "pendente", label: "Pendentes", view: "listWeek" } },
-    { id: "stat-confirmados", filter: { status: "confirmado", onlyToday: true, label: "Confirmados hoje", view: "timeGridDay" } },
-    { id: "stat-concluidos", filter: { status: "concluido", onlyToday: true, label: "Concluídos hoje", view: "timeGridDay" } },
-    { id: "stat-cancelados", filter: { status: "cancelado", label: "Cancelados neste mês", view: "dayGridMonth" } },
-    { id: "stat-total", filter: { onlyToday: true, label: "Hoje", view: "timeGridDay" } },
-    // CORREÇÃO: Adicionado pago: true para o card de faturamento funcionar corretamente no filtro
-    { id: "stat-faturamento", filter: { onlyToday: true, pago: true, label: "Pagos hoje", view: "timeGridDay" } },
+    { id: "stat-pendentes", filter: { status: "pendente", label: "Pendentes Gerais", view: "listWeek" } },
+    { id: "stat-confirmados", filter: { status: "confirmado", label: "Confirmados Gerais", view: "listWeek" } },
+    { id: "stat-concluidos", filter: { status: "concluido", label: "Concluídos Gerais", view: "listWeek" } },
+    { id: "stat-cancelados", filter: { status: "cancelado", label: "Cancelados Gerais", view: "listWeek" } },
+    
+    // Estes continuam apenas para "Hoje"
+    { id: "stat-total", filter: { onlyToday: true, label: "Agendamentos de Hoje", view: "timeGridDay" } },
+    { id: "stat-faturamento", filter: { onlyToday: true, pago: true, label: "Pagos Hoje", view: "timeGridDay" } },
   ];
   
   cards.forEach(({ id, filter }) => {
