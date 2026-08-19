@@ -74,23 +74,34 @@ export function initDashboard() {
   onStats((stats) => renderStats(stats));
 
   // ==========================================
-  // LÓGICA DO BOTÃO DE EMERGÊNCIA
+  // LÓGICA DO BOTÃO DE EMERGÊNCIA (COM SENHA)
   // ==========================================
   const toggleBloqueio = $("#toggle-bloqueio-site");
   if (toggleBloqueio) {
-    // Escuta o banco de dados em tempo real para manter o botão na posição correta
     onSnapshot(doc(db, "configuracoes", "sistema"), (snap) => {
       if (snap.exists()) {
         toggleBloqueio.checked = snap.data().bloqueado === true;
       }
     });
 
-    // Quando o admin clica no botão, pergunta se tem certeza e atualiza o banco
     toggleBloqueio.addEventListener("change", async (e) => {
       const isBloqueado = e.target.checked;
+      
+      // Solicita a senha ao usuário
+      const senhaDigitada = prompt("Ação restrita! Digite a senha administrativa para confirmar o bloqueio/desbloqueio:");
+      
+      // Validação da Senha
+      // ATENÇÃO: Você pode alterar a senha "1234" para a senha que preferir.
+      if (senhaDigitada !== "1234") {
+        alert("Senha incorreta! Ação cancelada.");
+        e.target.checked = !isBloqueado; // Devolve o botão para a posição original
+        return;
+      }
+
+      // Se a senha estiver certa, pergunta se ele tem certeza
       const confirmMsg = isBloqueado 
-        ? "ATENÇÃO: Isso vai impedir os clientes de agendarem pelo site. Tem certeza?"
-        : "Isso vai liberar o site para receber novos agendamentos. Confirmar?";
+        ? "Você digitou a senha correta.\nTem certeza que deseja BLOQUEAR o site para clientes?"
+        : "Você digitou a senha correta.\nTem certeza que deseja LIBERAR o site para clientes?";
         
       if (confirm(confirmMsg)) {
         try {
