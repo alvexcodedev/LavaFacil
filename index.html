@@ -65,6 +65,14 @@
 </section>
 
 <div id="agendar" class="ticket-wrap">
+  
+  <!-- === MENSAGEM DE BLOQUEIO (Escondida por padrão) === -->
+  <div id="msg-bloqueio" style="display: none; text-align: center; padding: 50px 20px; background: #fff; border-radius: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 2px solid #ffcdd2;">
+    <div style="font-size: 3.5rem; margin-bottom: 16px;">⚠️</div>
+    <h3 style="margin-bottom: 12px; color: #d32f2f; font-size: 1.5rem;">Agendamentos Suspensos</h3>
+    <p id="txt-bloqueio" style="color: var(--muted); line-height: 1.6; font-size:1.05rem; margin: 0;">Devido a problemas técnicos, estamos impossibilitados de receber agendamentos. Tente mais tarde.</p>
+  </div>
+
   <div class="ticket" id="ticket">
     <div class="ticket-notch" style="left:-13px;"></div>
     <div class="ticket-notch" style="right:-13px;"></div>
