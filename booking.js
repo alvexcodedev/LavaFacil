@@ -5,7 +5,7 @@ import { db } from "./firebase-config.js";
 import { SERVICOS, HORARIO_FUNCIONAMENTO, TELEFONE_NEGOCIO } from "./config.js";
 import {
   collection, addDoc, doc, setDoc, getDoc, query, where, getDocs,
-  Timestamp, serverTimestamp
+  Timestamp, serverTimestamp, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const state = {
@@ -13,8 +13,8 @@ const state = {
   nome: "", telefone: "",
   carroModelo: "", placa: "",
   servico: null,
-  data: null,        // "YYYY-MM-DD"
-  horaInicio: null,  // "HH:MM"
+  data: null,        
+  horaInicio: null,  
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -41,7 +41,7 @@ function maskPlaca(v) {
   return v;
 }
 function placaValida(v) {
-  return /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/.test(v); // aceita padrão antigo e Mercosul
+  return /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/.test(v); 
 }
 
 /* ---------------- steps navigation ---------------- */
@@ -106,8 +106,7 @@ function minutesToHHMM(min) {
   const m = String(min % 60).padStart(2, "0");
   return `${h}:${m}`;
 }
-// formata pra "YYYY-MM-DD" usando o horário LOCAL — nunca toISOString() aqui,
-// pois ele converte pra UTC e desloca o dia à noite (Brasil está atrás do UTC).
+
 function localDateStr(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -219,7 +218,6 @@ async function enviarAgendamento() {
       criadoEm: serverTimestamp(),
     });
 
-    // Cadastro/atualização do cliente por placa (histórico simples)
     await setDoc(doc(db, "clientes", state.placa), {
       nome: state.nome.trim(),
       telefone: state.telefone,
@@ -230,14 +228,10 @@ async function enviarAgendamento() {
 
     goToStep(6);
 
-    // ==========================================
-    // INTEGRAÇÃO WHATSAPP (MENSAGEM DO CLIENTE)
-    // ==========================================
     const numeroLavaExpresso = "18996746300";
     const dataFormatada = state.data.split('-').reverse().join('/');
     const msgCliente = `Olá! Acabei de fazer um agendamento no site.\n\n🚗 *Veículo:* ${state.carroModelo} (${state.placa})\n📅 *Data:* ${dataFormatada} às ${state.horaInicio}\n💧 *Serviço:* ${state.servico.nome}`;
     
-    // Abre a aba do WhatsApp
     window.open(`https://wa.me/55${numeroLavaExpresso}?text=${encodeURIComponent(msgCliente)}`, "_blank");
 
   } catch (err) {
@@ -251,6 +245,26 @@ async function enviarAgendamento() {
 /* ---------------- bind ---------------- */
 function bind() {
   renderServicos();
+
+  // ==========================================
+  // LÓGICA DE BLOQUEIO DE EMERGÊNCIA NO CLIENTE
+  // ==========================================
+  onSnapshot(doc(db, "configuracoes", "sistema"), (snap) => {
+    const msgBloqueio = $("#msg-bloqueio");
+    const ticket = $("#ticket");
+    const txtBloqueio = $("#txt-bloqueio");
+
+    if (snap.exists() && snap.data().bloqueado) {
+      if (ticket) ticket.style.display = "none";
+      if (msgBloqueio) msgBloqueio.style.display = "block";
+      if (txtBloqueio && snap.data().mensagem) {
+        txtBloqueio.textContent = snap.data().mensagem;
+      }
+    } else {
+      if (ticket) ticket.style.display = "block";
+      if (msgBloqueio) msgBloqueio.style.display = "none";
+    }
+  });
 
   $("#input-nome").addEventListener("input", (e) => (state.nome = e.target.value));
   $("#input-telefone").addEventListener("input", (e) => {
@@ -309,7 +323,6 @@ document.addEventListener("DOMContentLoaded", () => {
   aplicarServicoDaURL();
 });
 
-// pequenas revelações ao rolar
 document.addEventListener("DOMContentLoaded", () => {
   const els = document.querySelectorAll(".reveal");
   const io = new IntersectionObserver((entries) => {
