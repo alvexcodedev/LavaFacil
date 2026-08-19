@@ -64,6 +64,21 @@
         <button class="btn btn-primary btn-sm" id="btn-novo-agendamento">+ Novo agendamento</button>
       </div>
 
+      <!-- === NOVO: CONTROLE DE EMERGÊNCIA === -->
+      <div style="background: #fff0f0; border: 1px solid #ffcdd2; padding: 16px 20px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <h4 style="color: #d32f2f; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">⚠️ Controle de Emergência</h4>
+          <p style="margin: 0; font-size: 0.85rem; color: #b71c1c;">Bloqueie o site para novos agendamentos (ex: falta de água/energia).</p>
+        </div>
+        <label class="pay-toggle" style="margin:0;">
+          Bloquear site
+          <span class="switch">
+            <input type="checkbox" id="toggle-bloqueio-site">
+            <span class="track"></span>
+          </span>
+        </label>
+      </div>
+
       <div class="stats-grid">
         <button type="button" class="stat-card amber" id="stat-pendentes">
           <div class="stat-top">
