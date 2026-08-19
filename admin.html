@@ -60,23 +60,20 @@
     <!-- ===== VIEW: PAINEL (dashboard) ===== -->
     <div class="admin-view active" id="view-painel">
       <div class="admin-toolbar-row">
-        <h1>Painel Diário</h1>
-        <button class="btn btn-primary btn-sm" id="btn-novo-agendamento">+ Novo agendamento</button>
-      </div>
-
-      <!-- === NOVO: CONTROLE DE EMERGÊNCIA === -->
-      <div style="background: #fff0f0; border: 1px solid #ffcdd2; padding: 16px 20px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
-        <div>
-          <h4 style="color: #d32f2f; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">⚠️ Controle de Emergência</h4>
-          <p style="margin: 0; font-size: 0.85rem; color: #b71c1c;">Bloqueie o site para novos agendamentos (ex: falta de água/energia).</p>
+        
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <h1>Painel Diário</h1>
+          <!-- === NOVO: CONTROLE DE EMERGÊNCIA SUTIL === -->
+          <label class="pay-toggle" style="margin: 0; font-size: 0.8rem; color: var(--muted); font-weight: normal; cursor: pointer;" title="Bloquear agendamentos no site">
+            <span class="switch" style="transform: scale(0.8); transform-origin: left center; margin-right: 4px;">
+              <input type="checkbox" id="toggle-bloqueio-site">
+              <span class="track"></span>
+            </span>
+            Bloqueio de emergência
+          </label>
         </div>
-        <label class="pay-toggle" style="margin:0;">
-          Bloquear site
-          <span class="switch">
-            <input type="checkbox" id="toggle-bloqueio-site">
-            <span class="track"></span>
-          </span>
-        </label>
+
+        <button class="btn btn-primary btn-sm" id="btn-novo-agendamento">+ Novo agendamento</button>
       </div>
 
       <div class="stats-grid">
@@ -146,7 +143,6 @@
       <div class="admin-toolbar-row">
         <h1>Agenda</h1>
         
-        <!-- === NOVO FILTRO ADICIONADO AQUI === -->
         <div style="display: flex; gap: 10px; align-items: center;">
           <select id="agenda-status-filter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); background: #fff; font-family: inherit; font-size: 0.9rem; cursor: pointer; color: var(--text);">
             <option value="">Todos os status</option>
