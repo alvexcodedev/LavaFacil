@@ -2,6 +2,8 @@
 // PAINEL ADMIN — dashboard inicial com cards de indicadores
 // =========================================================
 import { onStats, setFilter, openEditModal } from "./admin-calendar.js";
+import { db } from "./firebase-config.js";
+import { doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -53,16 +55,11 @@ function renderStats(stats) {
 }
 
 export function initDashboard() {
-  // AQUI ESTÁ A CORREÇÃO:
-  // Removido o 'onlyToday: true' dos cards de status gerais.
-  // Adicionado 'label' para mostrar na chip flutuante da agenda.
   const cards = [
     { id: "stat-pendentes", filter: { status: "pendente", label: "Pendentes Gerais", view: "listWeek" } },
     { id: "stat-confirmados", filter: { status: "confirmado", label: "Confirmados Gerais", view: "listWeek" } },
     { id: "stat-concluidos", filter: { status: "concluido", label: "Concluídos Gerais", view: "listWeek" } },
     { id: "stat-cancelados", filter: { status: "cancelado", label: "Cancelados Gerais", view: "listWeek" } },
-    
-    // Estes continuam apenas para "Hoje"
     { id: "stat-total", filter: { onlyToday: true, label: "Agendamentos de Hoje", view: "timeGridDay" } },
     { id: "stat-faturamento", filter: { onlyToday: true, pago: true, label: "Pagos Hoje", view: "timeGridDay" } },
   ];
@@ -75,4 +72,39 @@ export function initDashboard() {
   });
 
   onStats((stats) => renderStats(stats));
+
+  // ==========================================
+  // LÓGICA DO BOTÃO DE EMERGÊNCIA
+  // ==========================================
+  const toggleBloqueio = $("#toggle-bloqueio-site");
+  if (toggleBloqueio) {
+    // Escuta o banco de dados em tempo real para manter o botão na posição correta
+    onSnapshot(doc(db, "configuracoes", "sistema"), (snap) => {
+      if (snap.exists()) {
+        toggleBloqueio.checked = snap.data().bloqueado === true;
+      }
+    });
+
+    // Quando o admin clica no botão, pergunta se tem certeza e atualiza o banco
+    toggleBloqueio.addEventListener("change", async (e) => {
+      const isBloqueado = e.target.checked;
+      const confirmMsg = isBloqueado 
+        ? "ATENÇÃO: Isso vai impedir os clientes de agendarem pelo site. Tem certeza?"
+        : "Isso vai liberar o site para receber novos agendamentos. Confirmar?";
+        
+      if (confirm(confirmMsg)) {
+        try {
+          await setDoc(doc(db, "configuracoes", "sistema"), { 
+            bloqueado: isBloqueado,
+            mensagem: "Devido a problemas de força maior (como falta de água ou energia na região), estamos temporariamente impossibilitados de receber novos agendamentos online. Por favor, tente novamente mais tarde."
+          }, { merge: true });
+        } catch (err) {
+          console.error("Erro ao alterar status do sistema", err);
+          e.target.checked = !isBloqueado; 
+        }
+      } else {
+        e.target.checked = !isBloqueado; 
+      }
+    });
+  }
 }
